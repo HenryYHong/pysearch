@@ -16,7 +16,7 @@ def build_index(docs):
         token_count[token] = 1
       else:
         token_count[token] += 1
-    docstore[doc_id] = {"length" : len(tokens), "unique_length" : len(token_count)}
+    docstore[doc_id] = {"length" : len(tokens), "unique_length" : len(token_count), "text" : text}
     for token in token_count:
       if token not in index:
         index[token] = {doc_id : token_count[token]}
