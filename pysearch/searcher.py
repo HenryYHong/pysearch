@@ -10,12 +10,14 @@ def doc_searcher(index, docstore, query_text, k=10, method="tf"):
   for token in query_tokens:
     if token in index:
       df = len(index[token]) # document frequency
-      idf = math.log((N + 1) / (df + 1)) + 1
+      if method == "tfidf":
+        idf = math.log((N + 1) / (df + 1)) + 1
       for doc, tf in index[token].items():
         if method == "tf":
           scores[doc] += tf
         elif method == "tfidf":
-          scores[doc] += tf * idf
+          doc_len = docstore[doc]["length"]
+          scores[doc] += (tf / doc_len) * idf
         else:
           raise ValueError("Not a known method")
   scores = [key for key, value in sorted(scores.items(), key = lambda item : (item[1], -item[0]), reverse = True)]
@@ -46,8 +48,8 @@ def make_snippet(text, query_tokens, window=30):
   else:
     return text[: 2 * window] + "..."
       
-def search_with_snippets(index, docstore, query_text, k=10):
-  doc_ids = doc_searcher(index, docstore, query_text, k)
+def search_with_snippets(index, docstore, query_text, k=10, method="tf", window=30):
+  doc_ids = doc_searcher(index, docstore, query_text, k, method=method)
   query_tokens = tokenize(query_text)
 
   results = []
